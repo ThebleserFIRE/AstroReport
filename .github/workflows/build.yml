@@ -1,0 +1,30 @@
+name: Build AstroReport
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepara il progetto
+        run: |
+          rm -rf project
+          mkdir project
+          unzip -q astroreport.zip -d project
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Compila
+        working-directory: project
+        run: mvn -B package
+      - name: Pubblica il jar
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: AstroReport build ${{ github.run_number }}
+          files: project/target/AstroReport.jar
